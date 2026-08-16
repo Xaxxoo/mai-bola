@@ -65,6 +65,27 @@ Currency is NGN — store numbers only.
 - Never edit a migration after it has been applied to any shared environment
 - The TypeORM CLI runs via `tsx` (not `ts-node`) for Node v24 compatibility
 
+## Pagination convention
+
+All paginated list endpoints use the same query/response shape:
+
+**Query parameters:** `?page=1&limit=20`
+- `page` — 1-based page number (default `1`)
+- `limit` — items per page (default `20`, max `100`)
+
+**Response body:**
+```json
+{ "data": [...], "total": 42, "page": 1, "limit": 20 }
+```
+
+Extend `PaginationQueryDto` from `src/common/dto` for new list endpoints.
+Constants `DEFAULT_PAGE_SIZE` and `MAX_PAGE_SIZE` live in `@mai-bola/shared`.
+
+## Kaduna zones
+
+Valid zones are defined in `KADUNA_ZONES` from `@mai-bola/shared`.
+Address entities must use a value from this list.
+
 ## Environment variables
 
 Copy `.env.example` files at root and in each app, then fill in values:
