@@ -18,5 +18,10 @@ export const Role = {
 export type Role = (typeof Role)[keyof typeof Role];
 
 // Constants
-export const APP_NAME = 'Mai Bola';
-export const DEFAULT_PAGE_SIZE = 20;
+export {
+  APP_NAME,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  KADUNA_ZONES,
+} from './constants';
+export type { KadunaZone } from './constants';
