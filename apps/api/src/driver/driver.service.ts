@@ -22,6 +22,9 @@ import { PickupRequest } from '../entities/pickup-request.entity';
 import { PickupRequestsService } from '../pickup-requests/pickup-requests.service';
 import { ConfigService } from '../config/config.service';
 import { CollectDto, SkipStopDto } from './dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../enums';
+import { Optional } from '@nestjs/common';
 
 @Injectable()
 export class DriverService {
@@ -35,6 +38,7 @@ export class DriverService {
     private readonly pickupService: PickupRequestsService,
     private readonly configService: ConfigService,
     private readonly dataSource: DataSource,
+    @Optional() private readonly notifications?: NotificationsService,
   ) {}
 
   // --- Today's routes for driver ---
@@ -154,7 +158,7 @@ export class DriverService {
     const pricePerKg = this.configService.pricePerKg;
     const amountPaid = Number((dto.actualKg * pricePerKg).toFixed(2));
 
-    return this.dataSource.transaction(async (manager) => {
+    const result = await this.dataSource.transaction(async (manager) => {
       // Lock the supplier's user row to prevent concurrent wallet operations
       await manager
         .getRepository(User)
@@ -193,6 +197,16 @@ export class DriverService {
         note: `Collection of ${dto.actualKg}kg at ₦${pricePerKg}/kg`,
       });
       await manager.save(walletTx);
+
+      if (this.notifications) {
+        await this.notifications.createInTransaction(manager, {
+          userId: supplierId,
+          type: NotificationType.COLLECTION_CREDITED,
+          title: 'Collection credited',
+          body: `₦${amountPaid.toLocaleString('en-NG')} was credited to your wallet.`,
+          data: { collectionId: savedCollection.id, amountPaid, actualKg: dto.actualKg },
+        });
+      }
 
       // Update stop status to COLLECTED
       stop.status = RouteStopStatus.COLLECTED;
@@ -236,6 +250,10 @@ export class DriverService {
 
       return savedCollection;
     });
+    if (this.notifications) {
+      void this.notifications.sendPush(supplierId, 'Collection credited', `₦${amountPaid.toLocaleString('en-NG')} was credited to your wallet.`, { amountPaid, actualKg: dto.actualKg });
+    }
+    return result;
   }
 
   // --- Skip stop ---

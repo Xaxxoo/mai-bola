@@ -6,9 +6,10 @@ import { AuditLog } from '../entities/audit-log.entity';
 import { RouteStop } from '../entities/route-stop.entity';
 import { PickupRequestsController } from './pickup-requests.controller';
 import { PickupRequestsService } from './pickup-requests.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PickupRequest, Address, AuditLog, RouteStop])],
+  imports: [TypeOrmModule.forFeature([PickupRequest, Address, AuditLog, RouteStop]), NotificationsModule],
   controllers: [PickupRequestsController],
   providers: [PickupRequestsService],
   exports: [PickupRequestsService],

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { TopBar } from '@/components/ui/top-bar';
 import { useToast } from '@/components/ui/toast';
+import { payoutAmountSchema, bankDestinationSchema, mobileDestinationSchema } from '@/lib/validation';
 
 const MIN_PAYOUT = 1000;
 
@@ -85,26 +86,17 @@ export default function WithdrawPage() {
 
   function validateAmount() {
     const errs: Record<string, string> = {};
-    if (!amount || amountNum <= 0) errs.amount = 'Enter an amount';
-    else if (amountNum < MIN_PAYOUT)
-      errs.amount = `Minimum withdrawal is ${formatNaira(MIN_PAYOUT)}`;
-    else if (amountNum > balance)
-      errs.amount = `Exceeds your balance of ${formatNaira(balance)}`;
+    const result = payoutAmountSchema.safeParse({ amount: amountNum });
+    if (!result.success) errs.amount = result.error.issues[0]?.message || 'Enter an amount';
+    else if (amountNum > balance) errs.amount = `Exceeds your balance of ${formatNaira(balance)}`;
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   function validateMethod() {
     const errs: Record<string, string> = {};
-    if (method === 'BANK_TRANSFER') {
-      if (!bankCode) errs.bank = 'Select a bank';
-      if (!accountNumber || accountNumber.length < 10)
-        errs.account = 'Enter a valid 10-digit account number';
-    } else {
-      if (!providerCode) errs.provider = 'Select a provider';
-      if (!phone || phone.replace(/\D/g, '').length < 10)
-        errs.phone = 'Enter a valid phone number';
-    }
+    const result = method === 'BANK_TRANSFER' ? bankDestinationSchema.safeParse({ bankCode, accountNumber }) : mobileDestinationSchema.safeParse({ providerCode, phone });
+    if (!result.success) result.error.issues.forEach((issue) => { errs[method === 'BANK_TRANSFER' && issue.path[0] === 'bankCode' ? 'bank' : String(issue.path[0])] = issue.message; });
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }

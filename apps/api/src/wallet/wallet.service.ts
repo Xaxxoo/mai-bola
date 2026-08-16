@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { Optional } from '@nestjs/common';
 import { WalletTransaction } from '../entities/wallet-transaction.entity';
 import { Payout } from '../entities/payout.entity';
 import { User } from '../entities/user.entity';
@@ -18,6 +19,8 @@ import {
   RejectPayoutDto,
   MarkPaidDto,
 } from './dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../enums';
 
 @Injectable()
 export class WalletService {
@@ -31,6 +34,7 @@ export class WalletService {
     @InjectRepository(AuditLog)
     private readonly auditRepo: Repository<AuditLog>,
     private readonly dataSource: DataSource,
+    @Optional() private readonly notifications?: NotificationsService,
   ) {}
 
   // --- Supplier: wallet overview ---
@@ -115,6 +119,16 @@ export class WalletService {
       });
       await manager.save(walletTx);
 
+      if (this.notifications) {
+        await this.notifications.createInTransaction(manager, {
+          userId,
+          type: NotificationType.PAYOUT_STATUS_CHANGED,
+          title: 'Payout requested',
+          body: `Your payout request for ₦${Number(dto.amount).toLocaleString('en-NG')} is pending review.`,
+          data: { payoutId: savedPayout.id, status: PayoutStatus.REQUESTED },
+        });
+      }
+
       // Audit
       await manager.save(
         manager.create(AuditLog, {
@@ -186,6 +200,16 @@ export class WalletService {
       });
       await manager.save(walletTx);
 
+      if (this.notifications) {
+        await this.notifications.createInTransaction(manager, {
+          userId: payout.userId,
+          type: NotificationType.PAYOUT_STATUS_CHANGED,
+          title: 'Payout cancelled',
+          body: 'Your payout was cancelled and the funds were returned to your wallet.',
+          data: { payoutId: payout.id, status: PayoutStatus.REJECTED },
+        });
+      }
+
       await manager.save(
         manager.create(AuditLog, {
           actorId: userId,
@@ -237,17 +261,17 @@ export class WalletService {
       throw new BadRequestException('Payout must be in REQUESTED status');
     }
 
-    payout.status = PayoutStatus.APPROVED;
-    payout.processedById = adminId;
-    payout.processedAt = new Date();
-    await this.payoutRepo.save(payout);
-
-    await this.writeAudit(adminId, 'PAYOUT_APPROVED', payoutId, {
-      amount: payout.amount,
-      userId: payout.userId,
+    const result = await this.dataSource.transaction(async (manager) => {
+      payout.status = PayoutStatus.APPROVED;
+      payout.processedById = adminId;
+      payout.processedAt = new Date();
+      await manager.save(payout);
+      await manager.save(manager.create(AuditLog, { actorId: adminId, action: 'PAYOUT_APPROVED', entityType: 'Payout', entityId: payoutId, payload: { amount: payout.amount, userId: payout.userId } }));
+      if (this.notifications) await this.notifications.createInTransaction(manager, { userId: payout.userId, type: NotificationType.PAYOUT_STATUS_CHANGED, title: 'Payout approved', body: 'Your payout has been approved and is being processed.', data: { payoutId, status: PayoutStatus.APPROVED } });
+      return payout;
     });
-
-    return payout;
+    if (this.notifications) void this.notifications.sendPush(payout.userId, 'Payout approved', 'Your payout has been approved and is being processed.', { payoutId, status: PayoutStatus.APPROVED });
+    return result;
   }
 
   // --- Admin: reject payout (refund) ---
@@ -288,6 +312,16 @@ export class WalletService {
       });
       await manager.save(walletTx);
 
+      if (this.notifications) {
+        await this.notifications.createInTransaction(manager, {
+          userId: payout.userId,
+          type: NotificationType.PAYOUT_STATUS_CHANGED,
+          title: 'Payout rejected',
+          body: dto.reason ? `Your payout was rejected: ${dto.reason}` : 'Your payout was rejected and refunded.',
+          data: { payoutId: payout.id, status: PayoutStatus.REJECTED },
+        });
+      }
+
       // Audit
       await manager.save(
         manager.create(AuditLog, {
@@ -316,19 +350,18 @@ export class WalletService {
       throw new BadRequestException('Payout must be in APPROVED status');
     }
 
-    payout.status = PayoutStatus.PAID;
-    payout.paidReference = dto.reference;
-    payout.processedById = adminId;
-    payout.processedAt = new Date();
-    await this.payoutRepo.save(payout);
-
-    await this.writeAudit(adminId, 'PAYOUT_PAID', payoutId, {
-      amount: payout.amount,
-      userId: payout.userId,
-      reference: dto.reference,
+    const result = await this.dataSource.transaction(async (manager) => {
+      payout.status = PayoutStatus.PAID;
+      payout.paidReference = dto.reference;
+      payout.processedById = adminId;
+      payout.processedAt = new Date();
+      await manager.save(payout);
+      await manager.save(manager.create(AuditLog, { actorId: adminId, action: 'PAYOUT_PAID', entityType: 'Payout', entityId: payoutId, payload: { amount: payout.amount, userId: payout.userId, reference: dto.reference } }));
+      if (this.notifications) await this.notifications.createInTransaction(manager, { userId: payout.userId, type: NotificationType.PAYOUT_STATUS_CHANGED, title: 'Payout paid', body: `Your payout has been sent. Reference: ${dto.reference}`, data: { payoutId, status: PayoutStatus.PAID, reference: dto.reference } });
+      return payout;
     });
-
-    return payout;
+    if (this.notifications) void this.notifications.sendPush(payout.userId, 'Payout paid', `Your payout has been sent. Reference: ${dto.reference}`, { payoutId, status: PayoutStatus.PAID, reference: dto.reference });
+    return result;
   }
 
   // --- Admin: wallet summary ---

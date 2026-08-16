@@ -10,6 +10,7 @@ import { PickupRequestsModule } from '../pickup-requests/pickup-requests.module'
 import { ConfigModule } from '../config/config.module';
 import { DriverController } from './driver.controller';
 import { DriverService } from './driver.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { DriverService } from './driver.service';
     ]),
     PickupRequestsModule,
     ConfigModule,
+    NotificationsModule,
   ],
   controllers: [DriverController],
   providers: [DriverService],

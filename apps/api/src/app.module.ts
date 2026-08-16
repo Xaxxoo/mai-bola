@@ -30,6 +30,9 @@ import { InventoryBatch } from './entities/inventory-batch.entity';
 import { Sale } from './entities/sale.entity';
 import { AuditLog } from './entities/audit-log.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { Notification } from './entities/notification.entity';
+import { PushSubscription } from './entities/push-subscription.entity';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -52,6 +55,8 @@ import { RefreshToken } from './entities/refresh-token.entity';
         AuditLog,
         RefreshToken,
         Setting,
+        Notification,
+        PushSubscription,
       ],
       synchronize: false,
       logging: process.env.NODE_ENV !== 'production',
@@ -71,6 +76,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
     WalletModule,
     InventoryModule,
     MetricsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

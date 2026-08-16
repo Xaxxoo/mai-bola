@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { PickupRequest } from '../entities/pickup-request.entity';
 import { Address } from '../entities/address.entity';
 import { AuditLog } from '../entities/audit-log.entity';
@@ -17,6 +17,9 @@ import {
   ListPickupRequestsQueryDto,
   CancelPickupRequestDto,
 } from './dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../enums';
+import { Optional } from '@nestjs/common';
 
 const MAX_OPEN_REQUESTS = 3;
 
@@ -31,6 +34,8 @@ export class PickupRequestsService {
     private readonly auditRepo: Repository<AuditLog>,
     @InjectRepository(RouteStop)
     private readonly routeStopRepo: Repository<RouteStop>,
+    @Optional() private readonly dataSource?: DataSource,
+    @Optional() private readonly notifications?: NotificationsService,
   ) {}
 
   async create(userId: string, dto: CreatePickupRequestDto) {
@@ -156,6 +161,34 @@ export class PickupRequestsService {
     to: PickupRequestStatus,
     actorId: string,
   ) {
+    if (this.dataSource && this.notifications) {
+      const result = await this.dataSource.transaction(async (manager) => {
+        const repo = manager.getRepository(PickupRequest);
+        const auditRepo = manager.getRepository(AuditLog);
+        const pickup = await repo.findOne({ where: { id: pickupId } });
+        if (!pickup) throw new NotFoundException('Pickup request not found');
+        assertTransition(pickup.status, to);
+        const from = pickup.status;
+        pickup.status = to;
+        await repo.save(pickup);
+        await auditRepo.save(auditRepo.create({ actorId, action: 'STATUS_CHANGE', entityType: 'PickupRequest', entityId: pickup.id, payload: { from, to } }));
+        if (to === PickupRequestStatus.SCHEDULED) {
+          await this.notifications!.createInTransaction(manager, {
+            userId: pickup.userId,
+            type: NotificationType.PICKUP_SCHEDULED,
+            title: 'Pickup scheduled',
+            body: 'Your pickup is scheduled. We will see you on the route.',
+            data: { pickupRequestId: pickup.id },
+          });
+        }
+        return pickup;
+      });
+      if (to === PickupRequestStatus.SCHEDULED) {
+        void this.notifications.sendPush(result.userId, 'Pickup scheduled', 'Your pickup is scheduled.', { pickupRequestId: result.id });
+      }
+      return result;
+    }
+
     const pickup = await this.pickupRepo.findOne({
       where: { id: pickupId },
     });

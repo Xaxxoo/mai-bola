@@ -13,6 +13,8 @@ import { Sale } from './entities/sale.entity';
 import { AuditLog } from './entities/audit-log.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { Setting } from './entities/setting.entity';
+import { Notification } from './entities/notification.entity';
+import { PushSubscription } from './entities/push-subscription.entity';
 
 const databaseUrl =
   process.env.DATABASE_URL ||
@@ -35,6 +37,8 @@ export default new DataSource({
     AuditLog,
     RefreshToken,
     Setting,
+    Notification,
+    PushSubscription,
   ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,

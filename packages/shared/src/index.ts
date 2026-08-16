@@ -37,3 +37,4 @@ export {
   moneyMul,
   moneyCmp,
 } from './money';
+export { formatNaira, formatDate, formatDateTime } from './format';

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { toE164, isValidPhone } from '@/lib/format-phone';
+import { loginSchema } from '@/lib/validation';
 
 export default function LoginPage() {
   const { login, loading, error } = useAuth();
@@ -16,8 +17,9 @@ export default function LoginPage() {
 
   function validate() {
     const errors: Record<string, string> = {};
+    const result = loginSchema.safeParse({ phone: toE164(phone), password });
     if (!isValidPhone(phone)) errors.phone = 'Enter a valid 10-digit phone number';
-    if (!password) errors.password = 'Password is required';
+    if (!result.success) result.error.issues.forEach((issue) => { errors[String(issue.path[0])] = issue.message; });
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }

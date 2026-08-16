@@ -29,3 +29,9 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+self.addEventListener('push', (event: any) => {
+  const payload = event.data?.json?.() || { title: 'Mai Bola', body: 'You have a new update.' };
+  event.waitUntil(self.registration.showNotification(payload.title, { body: payload.body, data: payload.data, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png' }));
+});
+self.addEventListener('notificationclick', (event: any) => { event.notification.close(); event.waitUntil(self.clients.openWindow(event.notification.data?.url || '/')); });

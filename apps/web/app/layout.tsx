@@ -6,6 +6,8 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Mai Bola',
   description: 'PET bottle recovery platform — Kaduna, Nigeria',
+  keywords: ['PET recycling', 'waste recovery', 'Kaduna', 'Mai Bola'],
+  openGraph: { title: 'Mai Bola', description: 'Turn recovered PET into value.', type: 'website' },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

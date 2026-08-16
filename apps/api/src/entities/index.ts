@@ -10,3 +10,5 @@ export { InventoryBatch } from './inventory-batch.entity';
 export { Sale } from './sale.entity';
 export { AuditLog } from './audit-log.entity';
 export { RefreshToken } from './refresh-token.entity';
+export { Notification } from './notification.entity';
+export { PushSubscription } from './push-subscription.entity';
