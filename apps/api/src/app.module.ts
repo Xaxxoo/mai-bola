@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
@@ -12,9 +12,12 @@ import { RoutesModule } from './routes/routes.module';
 import { DriverModule } from './driver/driver.module';
 import { WalletModule } from './wallet/wallet.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { MetricsModule } from './metrics/metrics.module';
 import { Setting } from './entities/setting.entity';
 import { JwtAuthGuard } from './common/guards';
 import { RolesGuard } from './common/guards';
+import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { User } from './entities/user.entity';
 import { Address } from './entities/address.entity';
 import { PickupRequest } from './entities/pickup-request.entity';
@@ -67,13 +70,19 @@ import { RefreshToken } from './entities/refresh-token.entity';
     DriverModule,
     WalletModule,
     InventoryModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+  }
+}
