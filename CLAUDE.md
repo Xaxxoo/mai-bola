@@ -86,6 +86,24 @@ Constants `DEFAULT_PAGE_SIZE` and `MAX_PAGE_SIZE` live in `@mai-bola/shared`.
 Valid zones are defined in `KADUNA_ZONES` from `@mai-bola/shared`.
 Address entities must use a value from this list.
 
+## Wallet balance
+
+Supplier wallet balance is derived from the `wallet_transactions` table — there is no
+denormalized balance column on the User entity. The balance equals the `balanceAfter`
+value of the supplier's most recent `WalletTransaction` row (or `0` if none exist).
+
+When crediting a wallet (e.g. during collection), the API:
+
+1. Opens a database transaction
+2. Locks the supplier's `users` row with `SELECT ... FOR UPDATE`
+3. Reads the latest `wallet_transactions.balanceAfter` for that user
+4. Inserts a new `Collection` row
+5. Inserts a new `WalletTransaction` with the updated `balanceAfter`
+6. Commits the transaction
+
+This prevents double-credits from concurrent collection requests targeting the same
+supplier. The `PRICE_PER_KG` env var (default `120`) controls the NGN rate.
+
 ## Environment variables
 
 Copy `.env.example` files at root and in each app, then fill in values:
