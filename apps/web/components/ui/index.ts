@@ -9,3 +9,4 @@ export { TopBar } from './top-bar';
 export { EmptyState } from './empty-state';
 export { Skeleton, SkeletonCard } from './skeleton';
 export { ToastProvider, useToast } from './toast';
+export { StatusStepper } from './status-stepper';
