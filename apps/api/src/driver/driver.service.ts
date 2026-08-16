@@ -51,6 +51,7 @@ export class DriverService {
         'stops',
         'stops.pickupRequest',
         'stops.pickupRequest.address',
+        'stops.pickupRequest.user',
         'stops.collection',
       ],
     });
@@ -61,7 +62,7 @@ export class DriverService {
       }
     }
 
-    return routes;
+    return routes.map((route) => this.toDriverManifest(route));
   }
 
   // --- Start route ---
@@ -97,11 +98,14 @@ export class DriverService {
 
   // --- Arrive at stop ---
 
-  async arriveStop(stopId: string, driverId: string) {
+  async arriveStop(stopId: string, driverId: string, idempotencyKey?: string) {
     const stop = await this.getStopForDriver(stopId, driverId);
 
     if (stop.route.status !== RouteStatus.IN_PROGRESS) {
       throw new BadRequestException('Route must be in progress');
+    }
+    if (stop.status === RouteStopStatus.ARRIVED && idempotencyKey) {
+      return stop;
     }
     if (stop.status !== RouteStopStatus.PENDING) {
       throw new BadRequestException('Stop must be in PENDING status');
@@ -119,8 +123,25 @@ export class DriverService {
 
   // --- Collect at stop (transactional with wallet credit) ---
 
-  async collectStop(stopId: string, driverId: string, dto: CollectDto) {
+  async collectStop(
+    stopId: string,
+    driverId: string,
+    dto: CollectDto,
+    idempotencyKey?: string,
+  ) {
     const stop = await this.getStopForDriver(stopId, driverId);
+
+    // A retried offline action returns the original collection and never
+    // credits the supplier twice.
+    if (idempotencyKey) {
+      const existing = await this.dataSource.transaction(async (manager) => {
+        const repo = manager.getRepository(Collection);
+        return typeof repo.findOne === 'function'
+          ? repo.findOne({ where: { idempotencyKey } })
+          : null;
+      });
+      if (existing) return existing;
+    }
 
     if (stop.route.status !== RouteStatus.IN_PROGRESS) {
       throw new BadRequestException('Route must be in progress');
@@ -153,6 +174,7 @@ export class DriverService {
       // Create collection record
       const collection = manager.create(Collection, {
         routeStopId: stopId,
+        idempotencyKey: idempotencyKey || null,
         actualKg: dto.actualKg,
         pricePerKg,
         amountPaid,
@@ -218,11 +240,19 @@ export class DriverService {
 
   // --- Skip stop ---
 
-  async skipStop(stopId: string, driverId: string, dto: SkipStopDto) {
+  async skipStop(
+    stopId: string,
+    driverId: string,
+    dto: SkipStopDto,
+    idempotencyKey?: string,
+  ) {
     const stop = await this.getStopForDriver(stopId, driverId);
 
     if (stop.route.status !== RouteStatus.IN_PROGRESS) {
       throw new BadRequestException('Route must be in progress');
+    }
+    if (stop.status === RouteStopStatus.SKIPPED && idempotencyKey) {
+      return stop;
     }
     if (
       stop.status !== RouteStopStatus.PENDING &&
@@ -307,13 +337,47 @@ export class DriverService {
         'stops',
         'stops.pickupRequest',
         'stops.pickupRequest.address',
+        'stops.pickupRequest.user',
         'stops.collection',
       ],
     });
     if (route && route.stops) {
       route.stops.sort((a, b) => a.stopOrder - b.stopOrder);
     }
-    return route;
+    return route ? this.toDriverManifest(route) : route;
+  }
+
+  private toDriverManifest(route: Route) {
+    const stops = (route.stops || [])
+      .sort((a, b) => a.stopOrder - b.stopOrder)
+      .map((stop) => ({
+        id: stop.id,
+        stopOrder: stop.stopOrder,
+        status: stop.status,
+        skippedReason: stop.skippedReason,
+        collection: stop.collection || null,
+        estimatedKg: Number(stop.pickupRequest?.estimatedKg || 0),
+        pickupRequest: {
+          id: stop.pickupRequest?.id,
+          estimatedKg: Number(stop.pickupRequest?.estimatedKg || 0),
+          status: stop.pickupRequest?.status,
+          address: stop.pickupRequest?.address,
+        },
+        supplier: {
+          fullName: stop.pickupRequest?.user?.fullName || 'Supplier',
+          phone: stop.pickupRequest?.user?.phone || '',
+        },
+      }));
+
+    return {
+      id: route.id,
+      name: route.name,
+      zone: route.zone,
+      scheduledDate: route.scheduledDate,
+      status: route.status,
+      stops,
+      estimatedTotalKg: stops.reduce((sum, stop) => sum + stop.estimatedKg, 0),
+    };
   }
 
   private async writeAudit(

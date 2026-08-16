@@ -19,6 +19,9 @@ export class Collection {
   @Column({ type: 'uuid', unique: true })
   routeStopId: string;
 
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  idempotencyKey?: string | null;
+
   @OneToOne(() => RouteStop, (rs) => rs.collection, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'routeStopId' })
   routeStop: RouteStop;

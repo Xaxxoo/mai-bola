@@ -114,3 +114,11 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 cp apps/admin/.env.example apps/admin/.env
 ```
+
+## Driver offline testing
+
+1. Log in with a `DRIVER` account and open `/driver/route?routeId=<today-route-id>` once while online. This caches the route manifest in IndexedDB.
+2. In Chrome DevTools, open **Application → Service Workers** and confirm the PWA service worker is active. Then use **Network → Throttling → Offline**.
+3. Tap **Arrive at stop**, enter a weight with the keypad, confirm collection, or skip with a reason. The `N actions pending sync` pill should increment and the stop list should update locally.
+4. Switch throttling back to **No throttling** (or select **Online**), wait for the pill to reach zero, and verify the API has one collection and one wallet credit per stop. Collection requests carry an idempotency key, so a retry after a dropped connection cannot double-credit.
+5. To inspect the manifest and queue, use **Application → IndexedDB → mai-bola-driver** (`manifests` and `actions` stores).

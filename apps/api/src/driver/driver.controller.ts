@@ -4,6 +4,7 @@ import {
   Post,
   Param,
   Body,
+  Headers,
   Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -29,8 +30,12 @@ export class DriverController {
   }
 
   @Post('stops/:id/arrive')
-  arrive(@Param('id') id: string, @Req() req: any) {
-    return this.driverService.arriveStop(id, req.user.sub);
+  arrive(
+    @Param('id') id: string,
+    @Req() req: any,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ) {
+    return this.driverService.arriveStop(id, req.user.sub, idempotencyKey);
   }
 
   @Post('stops/:id/collect')
@@ -38,8 +43,9 @@ export class DriverController {
     @Param('id') id: string,
     @Body() dto: CollectDto,
     @Req() req: any,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.driverService.collectStop(id, req.user.sub, dto);
+    return this.driverService.collectStop(id, req.user.sub, dto, idempotencyKey);
   }
 
   @Post('stops/:id/skip')
@@ -47,8 +53,9 @@ export class DriverController {
     @Param('id') id: string,
     @Body() dto: SkipStopDto,
     @Req() req: any,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.driverService.skipStop(id, req.user.sub, dto);
+    return this.driverService.skipStop(id, req.user.sub, dto, idempotencyKey);
   }
 
   @Post('routes/:id/complete')

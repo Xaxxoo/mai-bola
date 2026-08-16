@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Query, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Body,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../enums';
@@ -27,5 +36,18 @@ export class WalletController {
   @Post('payouts')
   requestPayout(@Req() req: any, @Body() dto: RequestPayoutDto) {
     return this.walletService.requestPayout(req.user.sub, dto);
+  }
+
+  @Get('payouts/mine')
+  listMyPayouts(@Req() req: any) {
+    return this.walletService.listMyPayouts(req.user.sub);
+  }
+
+  @Post('payouts/:id/cancel')
+  cancelPayout(
+    @Req() req: any,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.walletService.cancelPayout(id, req.user.sub);
   }
 }

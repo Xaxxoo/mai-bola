@@ -134,6 +134,75 @@ export class WalletService {
     });
   }
 
+  // --- Supplier: list own payouts ---
+
+  async listMyPayouts(userId: string) {
+    const data = await this.payoutRepo.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+    });
+    return data;
+  }
+
+  // --- Supplier: cancel own payout (only REQUESTED) ---
+
+  async cancelPayout(payoutId: string, userId: string) {
+    const payout = await this.payoutRepo.findOne({
+      where: { id: payoutId, userId },
+    });
+    if (!payout) {
+      throw new NotFoundException('Payout not found');
+    }
+    if (payout.status !== PayoutStatus.REQUESTED) {
+      throw new BadRequestException(
+        'Only payouts in REQUESTED status can be cancelled',
+      );
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      payout.status = PayoutStatus.REJECTED;
+      payout.rejectedReason = 'Cancelled by supplier';
+      await manager.save(payout);
+
+      // Lock supplier row for wallet refund
+      await manager
+        .getRepository(User)
+        .createQueryBuilder('u')
+        .setLock('pessimistic_write')
+        .where('u.id = :userId', { userId })
+        .getOne();
+
+      const currentBalance = await this.getBalanceInTx(manager, userId);
+      const newBalance = moneyAdd(currentBalance, payout.amount);
+
+      // Refund via ADJUSTMENT
+      const walletTx = manager.create(WalletTransaction, {
+        userId,
+        type: WalletTransactionType.ADJUSTMENT,
+        amount: Number(payout.amount),
+        balanceAfter: Number(newBalance),
+        reference: payout.id,
+        note: 'Payout cancelled by supplier',
+      });
+      await manager.save(walletTx);
+
+      await manager.save(
+        manager.create(AuditLog, {
+          actorId: userId,
+          action: 'PAYOUT_CANCELLED',
+          entityType: 'Payout',
+          entityId: payoutId,
+          payload: {
+            amount: payout.amount,
+            refundedBalance: newBalance,
+          },
+        }),
+      );
+
+      return payout;
+    });
+  }
+
   // --- Admin: list payouts ---
 
   async listPayouts(query: ListPayoutsQueryDto) {

@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import type { User } from '@mai-bola/shared';
 import { setAccessToken, getAccessToken } from '@/lib/api';
 
@@ -36,6 +37,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [state, setState] = useState<AuthState>({
     user: null,
     loading: true,
@@ -108,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAccessToken(data.accessToken);
         const user = await fetchUser(data.accessToken);
         setState({ user, loading: false, error: null });
-        router.push('/');
+        router.push(user.role === 'DRIVER' ? '/driver' : '/');
       } catch (err) {
         setState((s) => ({
           ...s,
@@ -119,6 +121,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [fetchUser, router],
   );
+
+  // Keep role-specific surfaces isolated even when a user follows a stale link.
+  useEffect(() => {
+    if (state.loading || !state.user || pathname === '/login' || pathname === '/register') {
+      return;
+    }
+    if (state.user.role === 'DRIVER' && !pathname.startsWith('/driver')) {
+      router.replace('/driver');
+    } else if (state.user.role !== 'DRIVER' && pathname.startsWith('/driver')) {
+      router.replace('/');
+    }
+  }, [pathname, router, state.loading, state.user]);
 
   const register = useCallback(
     async (payload: RegisterPayload) => {
