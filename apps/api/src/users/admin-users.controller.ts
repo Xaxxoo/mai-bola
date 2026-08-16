@@ -8,6 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../enums';
 import { UsersService } from './users.service';
@@ -17,6 +18,7 @@ import {
   AdminCreateUserDto,
 } from './dto';
 
+@ApiTags('Admin Users')
 @Controller('admin/users')
 @Roles(UserRole.ADMIN)
 export class AdminUsersController {

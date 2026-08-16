@@ -9,6 +9,7 @@ import {
   Query,
   Request,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../enums';
 import { RoutesService } from './routes.service';
@@ -20,6 +21,7 @@ import {
   ClusterSuggestQueryDto,
 } from './dto';
 
+@ApiTags('Admin Routes')
 @Controller('admin')
 @Roles(UserRole.ADMIN)
 export class RoutesController {

@@ -8,6 +8,7 @@ import {
   Query,
   Request,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { PickupRequestsService } from './pickup-requests.service';
 import {
   CreatePickupRequestDto,
@@ -15,6 +16,7 @@ import {
   CancelPickupRequestDto,
 } from './dto';
 
+@ApiTags('Pickup Requests')
 @Controller('pickup-requests')
 export class PickupRequestsController {
   constructor(private readonly service: PickupRequestsService) {}

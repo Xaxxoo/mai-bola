@@ -6,9 +6,11 @@ import {
   UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE_SERVICE, StorageService } from './storage.service';
 
+@ApiTags('Uploads')
 @Controller('uploads')
 export class UploadsController {
   constructor(

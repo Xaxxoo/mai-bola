@@ -8,6 +8,7 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../enums';
 import { InventoryService } from './inventory.service';
@@ -20,6 +21,7 @@ import {
   UpdateEconomicsDto,
 } from './dto';
 
+@ApiTags('Admin Inventory')
 @Controller('admin')
 @Roles(UserRole.ADMIN)
 export class InventoryController {

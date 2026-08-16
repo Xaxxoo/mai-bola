@@ -7,11 +7,13 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../enums';
 import { WalletService } from './wallet.service';
 import { ListPayoutsQueryDto, RejectPayoutDto, MarkPaidDto } from './dto';
 
+@ApiTags('Admin Payouts')
 @Controller('admin')
 @Roles(UserRole.ADMIN)
 export class AdminPayoutsController {

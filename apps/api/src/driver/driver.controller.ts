@@ -6,11 +6,13 @@ import {
   Body,
   Req,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../enums';
 import { DriverService } from './driver.service';
 import { CollectDto, SkipStopDto } from './dto';
 
+@ApiTags('Driver')
 @Controller('driver')
 @Roles(UserRole.DRIVER)
 export class DriverController {
