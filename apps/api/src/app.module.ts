@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PickupRequestsModule } from './pickup-requests/pickup-requests.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { RoutesModule } from './routes/routes.module';
 import { JwtAuthGuard } from './common/guards';
 import { RolesGuard } from './common/guards';
 import { User } from './entities/user.entity';
@@ -57,6 +58,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
     UsersModule,
     PickupRequestsModule,
     UploadsModule,
+    RoutesModule,
   ],
   controllers: [AppController],
   providers: [
