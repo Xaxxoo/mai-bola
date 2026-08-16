@@ -9,3 +9,4 @@ export { Payout } from './payout.entity';
 export { InventoryBatch } from './inventory-batch.entity';
 export { Sale } from './sale.entity';
 export { AuditLog } from './audit-log.entity';
+export { RefreshToken } from './refresh-token.entity';

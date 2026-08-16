@@ -11,6 +11,7 @@ import { Address } from './address.entity';
 import { PickupRequest } from './pickup-request.entity';
 import { WalletTransaction } from './wallet-transaction.entity';
 import { Payout } from './payout.entity';
+import { RefreshToken } from './refresh-token.entity';
 
 @Entity('users')
 export class User {
@@ -52,4 +53,7 @@ export class User {
 
   @OneToMany(() => Payout, (p) => p.user)
   payouts: Payout[];
+
+  @OneToMany(() => RefreshToken, (rt) => rt.user)
+  refreshTokens: RefreshToken[];
 }

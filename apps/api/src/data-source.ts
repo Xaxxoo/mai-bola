@@ -11,6 +11,7 @@ import { Payout } from './entities/payout.entity';
 import { InventoryBatch } from './entities/inventory-batch.entity';
 import { Sale } from './entities/sale.entity';
 import { AuditLog } from './entities/audit-log.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 const databaseUrl =
   process.env.DATABASE_URL ||
@@ -31,6 +32,7 @@ export default new DataSource({
     InventoryBatch,
     Sale,
     AuditLog,
+    RefreshToken,
   ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
