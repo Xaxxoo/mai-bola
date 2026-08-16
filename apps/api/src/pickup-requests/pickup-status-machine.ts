@@ -11,7 +11,10 @@ const TRANSITIONS: Record<PickupRequestStatus, PickupRequestStatus[]> = {
     PickupRequestStatus.CANCELLED,
   ],
   [PickupRequestStatus.SCHEDULED]: [PickupRequestStatus.EN_ROUTE],
-  [PickupRequestStatus.EN_ROUTE]: [PickupRequestStatus.COLLECTED],
+  [PickupRequestStatus.EN_ROUTE]: [
+    PickupRequestStatus.COLLECTED,
+    PickupRequestStatus.PENDING,
+  ],
   [PickupRequestStatus.COLLECTED]: [],
   [PickupRequestStatus.CANCELLED]: [],
 };
