@@ -1,7 +1,12 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './common/guards';
+import { RolesGuard } from './common/guards';
 import { User } from './entities/user.entity';
 import { Address } from './entities/address.entity';
 import { PickupRequest } from './entities/pickup-request.entity';
@@ -13,6 +18,7 @@ import { Payout } from './entities/payout.entity';
 import { InventoryBatch } from './entities/inventory-batch.entity';
 import { Sale } from './entities/sale.entity';
 import { AuditLog } from './entities/audit-log.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
@@ -33,12 +39,25 @@ import { AuditLog } from './entities/audit-log.entity';
         InventoryBatch,
         Sale,
         AuditLog,
+        RefreshToken,
       ],
       synchronize: false,
       logging: process.env.NODE_ENV !== 'production',
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: parseInt(process.env.THROTTLE_TTL || '60', 10) * 1000,
+        limit: parseInt(process.env.THROTTLE_LIMIT || '20', 10),
+      },
+    ]),
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}
