@@ -25,3 +25,13 @@ export {
   KADUNA_ZONES,
 } from './constants';
 export type { KadunaZone } from './constants';
+
+// Money utilities
+export {
+  toCents,
+  fromCents,
+  moneyAdd,
+  moneySub,
+  moneyMul,
+  moneyCmp,
+} from './money';
