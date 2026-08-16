@@ -1,0 +1,61 @@
+export enum UserRole {
+  SUPPLIER = 'SUPPLIER',
+  DRIVER = 'DRIVER',
+  ADMIN = 'ADMIN',
+}
+
+export enum SupplierType {
+  HOUSEHOLD = 'HOUSEHOLD',
+  WASTE_PICKER = 'WASTE_PICKER',
+  BUSINESS = 'BUSINESS',
+}
+
+export enum PickupRequestStatus {
+  PENDING = 'PENDING',
+  CLUSTERED = 'CLUSTERED',
+  SCHEDULED = 'SCHEDULED',
+  EN_ROUTE = 'EN_ROUTE',
+  COLLECTED = 'COLLECTED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum RouteStatus {
+  DRAFT = 'DRAFT',
+  DISPATCHED = 'DISPATCHED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+}
+
+export enum RouteStopStatus {
+  PENDING = 'PENDING',
+  ARRIVED = 'ARRIVED',
+  COLLECTED = 'COLLECTED',
+  SKIPPED = 'SKIPPED',
+}
+
+export enum WalletTransactionType {
+  CREDIT_COLLECTION = 'CREDIT_COLLECTION',
+  DEBIT_PAYOUT = 'DEBIT_PAYOUT',
+  ADJUSTMENT = 'ADJUSTMENT',
+}
+
+export enum PayoutMethod {
+  BANK_TRANSFER = 'BANK_TRANSFER',
+  MOBILE_MONEY = 'MOBILE_MONEY',
+  CASH = 'CASH',
+}
+
+export enum PayoutStatus {
+  REQUESTED = 'REQUESTED',
+  APPROVED = 'APPROVED',
+  PAID = 'PAID',
+  REJECTED = 'REJECTED',
+}
+
+export enum InventoryBatchStatus {
+  RAW = 'RAW',
+  SORTED = 'SORTED',
+  WASHED = 'WASHED',
+  COMPRESSED = 'COMPRESSED',
+  ALLOCATED = 'ALLOCATED',
+}
