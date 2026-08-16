@@ -5,6 +5,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { JwtAuthGuard } from './common/guards';
 import { RolesGuard } from './common/guards';
 import { User } from './entities/user.entity';
@@ -51,6 +52,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
       },
     ]),
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [
