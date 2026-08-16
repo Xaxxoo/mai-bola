@@ -38,6 +38,12 @@ export class Payout {
   })
   status: PayoutStatus;
 
+  @Column({ type: 'varchar', nullable: true })
+  rejectedReason: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  paidReference: string;
+
   @Column({ type: 'uuid', nullable: true })
   processedById: string;
 
