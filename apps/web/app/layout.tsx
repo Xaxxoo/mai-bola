@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${inter.variable} ${lora.variable}`}>
       <body>
         <Providers>
-          <div className="mx-auto max-w-app min-h-screen pb-20">
+            <div className="min-h-screen">
             {children}
           </div>
         </Providers>
