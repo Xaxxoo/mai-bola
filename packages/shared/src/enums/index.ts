@@ -8,7 +8,8 @@ export type Role = (typeof Role)[keyof typeof Role];
 
 export const PickupRequestStatus = {
   PENDING: 'PENDING',
-  ASSIGNED: 'ASSIGNED',
+  CLUSTERED: 'CLUSTERED',
+  SCHEDULED: 'SCHEDULED',
   EN_ROUTE: 'EN_ROUTE',
   COLLECTED: 'COLLECTED',
   CANCELLED: 'CANCELLED',

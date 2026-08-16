@@ -30,7 +30,8 @@ export function Badge({
 
 const pickupStatusVariant: Record<string, keyof typeof variants> = {
   [PickupRequestStatus.PENDING]: 'warning',
-  [PickupRequestStatus.ASSIGNED]: 'info',
+  [PickupRequestStatus.CLUSTERED]: 'info',
+  [PickupRequestStatus.SCHEDULED]: 'info',
   [PickupRequestStatus.EN_ROUTE]: 'info',
   [PickupRequestStatus.COLLECTED]: 'success',
   [PickupRequestStatus.CANCELLED]: 'error',
