@@ -41,4 +41,9 @@ export class AdminUsersController {
   createUser(@Body() dto: AdminCreateUserDto) {
     return this.usersService.adminCreateUser(dto);
   }
+
+  @Get(':id/overview')
+  getOverview(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.adminGetSupplierOverview(id);
+  }
 }

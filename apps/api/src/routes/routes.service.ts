@@ -62,6 +62,13 @@ export class RoutesService {
     if (query.zone) {
       qb.andWhere('a.zone = :zone', { zone: query.zone });
     }
+    if (query.from) qb.andWhere('p.createdAt >= :from', { from: query.from });
+    if (query.to) qb.andWhere('p.createdAt <= :to', { to: query.to });
+    if (query.search) {
+      qb.andWhere('(u.phone ILIKE :search OR u.fullName ILIKE :search)', {
+        search: `%${query.search}%`,
+      });
+    }
 
     qb.select([
       'p.id',
@@ -231,6 +238,7 @@ export class RoutesService {
         'stops.pickupRequest',
         'stops.pickupRequest.user',
         'stops.pickupRequest.address',
+        'stops.collection',
       ],
     });
     if (!route) throw new NotFoundException('Route not found');
@@ -245,6 +253,7 @@ export class RoutesService {
           id: s.id,
           stopOrder: s.stopOrder,
           status: s.status,
+          collection: s.collection || null,
           pickupRequest: {
             id: s.pickupRequest.id,
             estimatedKg: s.pickupRequest.estimatedKg,

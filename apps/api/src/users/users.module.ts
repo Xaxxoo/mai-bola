@@ -2,12 +2,14 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Address } from '../entities/address.entity';
+import { PickupRequest } from '../entities/pickup-request.entity';
+import { WalletTransaction } from '../entities/wallet-transaction.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { AdminUsersController } from './admin-users.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Address])],
+  imports: [TypeOrmModule.forFeature([User, Address, PickupRequest, WalletTransaction])],
   controllers: [UsersController, AdminUsersController],
   providers: [UsersService],
   exports: [UsersService],
