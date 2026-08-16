@@ -44,12 +44,26 @@ pnpm dev
 - API: http://localhost:4000
 - pgAdmin: http://localhost:5050
 
-## Database migration rules
+## Database
+
+### Entities
+
+User, Address, PickupRequest, Route, RouteStop, Collection,
+WalletTransaction, Payout, InventoryBatch, Sale, AuditLog.
+
+All entities use UUID primary keys and `createdAt`/`updatedAt` timestamps.
+Money columns use `decimal(12,2)`, weight columns use `decimal(10,2)`.
+Currency is NGN — store numbers only.
+
+### Migration rules
 
 - Always use TypeORM migrations — never `synchronize: true` in production
-- Generate migrations: `pnpm --filter @mai-bola/api typeorm migration:generate`
-- Run migrations: `pnpm --filter @mai-bola/api typeorm migration:run`
+- Generate: `pnpm --filter @mai-bola/api migration:generate src/migrations/MigrationName`
+- Run: `pnpm --filter @mai-bola/api migration:run`
+- Revert: `pnpm --filter @mai-bola/api migration:revert`
+- Seed: `pnpm --filter @mai-bola/api seed`
 - Never edit a migration after it has been applied to any shared environment
+- The TypeORM CLI runs via `tsx` (not `ts-node`) for Node v24 compatibility
 
 ## Environment variables
 
