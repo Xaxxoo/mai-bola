@@ -8,14 +8,13 @@ export interface User {
   updatedAt: Date;
 }
 
-// Roles
-export const Role = {
-  SUPPLIER: 'SUPPLIER',
-  DRIVER: 'DRIVER',
-  ADMIN: 'ADMIN',
-} as const;
-
-export type Role = (typeof Role)[keyof typeof Role];
+// Enums
+export { Role, PickupRequestStatus, PayoutStatus } from './enums';
+export type {
+  Role as RoleType,
+  PickupRequestStatus as PickupRequestStatusType,
+  PayoutStatus as PayoutStatusType,
+} from './enums';
 
 // Constants
 export {

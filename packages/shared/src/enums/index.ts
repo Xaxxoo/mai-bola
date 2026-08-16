@@ -5,3 +5,23 @@ export const Role = {
 } as const;
 
 export type Role = (typeof Role)[keyof typeof Role];
+
+export const PickupRequestStatus = {
+  PENDING: 'PENDING',
+  ASSIGNED: 'ASSIGNED',
+  EN_ROUTE: 'EN_ROUTE',
+  COLLECTED: 'COLLECTED',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+export type PickupRequestStatus =
+  (typeof PickupRequestStatus)[keyof typeof PickupRequestStatus];
+
+export const PayoutStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+} as const;
+
+export type PayoutStatus = (typeof PayoutStatus)[keyof typeof PayoutStatus];
