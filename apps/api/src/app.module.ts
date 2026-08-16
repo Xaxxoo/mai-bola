@@ -11,6 +11,8 @@ import { UploadsModule } from './uploads/uploads.module';
 import { RoutesModule } from './routes/routes.module';
 import { DriverModule } from './driver/driver.module';
 import { WalletModule } from './wallet/wallet.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { Setting } from './entities/setting.entity';
 import { JwtAuthGuard } from './common/guards';
 import { RolesGuard } from './common/guards';
 import { User } from './entities/user.entity';
@@ -46,6 +48,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
         Sale,
         AuditLog,
         RefreshToken,
+        Setting,
       ],
       synchronize: false,
       logging: process.env.NODE_ENV !== 'production',
@@ -63,6 +66,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
     RoutesModule,
     DriverModule,
     WalletModule,
+    InventoryModule,
   ],
   controllers: [AppController],
   providers: [
