@@ -87,6 +87,15 @@ export class InventoryService {
     return saved;
   }
 
+  async listUncommittedCollections() {
+    return this.collectionRepo
+      .createQueryBuilder('c')
+      .leftJoin('inventory_batch_collections', 'ibc', 'ibc.collectionId = c.id')
+      .where('ibc.collectionId IS NULL')
+      .orderBy('c.collectedAt', 'DESC')
+      .getMany();
+  }
+
   async advanceBatch(
     batchId: string,
     dto: AdvanceBatchDto,
@@ -270,6 +279,15 @@ export class InventoryService {
     });
 
     return settings;
+  }
+
+  async getEconomicsAudit() {
+    return this.auditRepo.find({
+      where: { action: 'ECONOMICS_UPDATED', entityType: 'Inventory' },
+      relations: ['actor'],
+      order: { createdAt: 'DESC' },
+      take: 50,
+    });
   }
 
   // ── Helpers ──────────────────────────────────────────

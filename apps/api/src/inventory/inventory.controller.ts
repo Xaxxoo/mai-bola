@@ -48,6 +48,11 @@ export class InventoryController {
     return this.inventoryService.listBatches(query);
   }
 
+  @Get('collections/uncommitted')
+  listUncommittedCollections() {
+    return this.inventoryService.listUncommittedCollections();
+  }
+
   // ── Sales ────────────────────────────────────────
 
   @Post('sales')
@@ -70,5 +75,10 @@ export class InventoryController {
   @Patch('economics/defaults')
   updateDefaults(@Body() dto: UpdateEconomicsDto, @Req() req: any) {
     return this.inventoryService.updateDefaults(dto, req.user.sub);
+  }
+
+  @Get('economics/audit')
+  getEconomicsAudit() {
+    return this.inventoryService.getEconomicsAudit();
   }
 }
