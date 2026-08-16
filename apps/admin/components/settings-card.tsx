@@ -1,0 +1,1 @@
+export function Card({ title, description }: { title: string; description: string }) { return <div className="rounded-2xl bg-white p-6 shadow-sm"><h2 className="font-heading text-lg font-bold text-text">{title}</h2><p className="mt-2 text-sm text-muted">{description}</p></div>; }
