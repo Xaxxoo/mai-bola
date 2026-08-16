@@ -25,3 +25,11 @@ export const PayoutStatus = {
 } as const;
 
 export type PayoutStatus = (typeof PayoutStatus)[keyof typeof PayoutStatus];
+
+export const SupplierType = {
+  HOUSEHOLD: 'HOUSEHOLD',
+  WASTE_PICKER: 'WASTE_PICKER',
+  BUSINESS: 'BUSINESS',
+} as const;
+
+export type SupplierType = (typeof SupplierType)[keyof typeof SupplierType];

@@ -1,19 +1,22 @@
 // Types
 export interface User {
   id: string;
-  email: string;
-  name: string;
+  phone: string;
+  fullName: string;
   role: string;
-  createdAt: Date;
-  updatedAt: Date;
+  supplierType: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Enums
-export { Role, PickupRequestStatus, PayoutStatus } from './enums';
+export { Role, PickupRequestStatus, PayoutStatus, SupplierType } from './enums';
 export type {
   Role as RoleType,
   PickupRequestStatus as PickupRequestStatusType,
   PayoutStatus as PayoutStatusType,
+  SupplierType as SupplierTypeType,
 } from './enums';
 
 // Constants
